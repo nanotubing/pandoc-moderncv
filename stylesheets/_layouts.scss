@@ -11,6 +11,7 @@
 //
 // ------------------------------------------------------------------------------------
 
+@use "sass:math";
 @import "settings";
 
 /* default grid value */
@@ -20,20 +21,10 @@ $column-width:  4em;
 $gutter-width:  2em;
 $grid-padding:  $gutter-width;
 
-$susy: (
-    columns: $total-columns,
-    gutter: $gutter-width / $column-width,
-    column-width: $column-width,
-
-    // for debug only
-    /*
-    debug: (
-        image: show,
-        color: blue,
-        output: overlay,
-        toggle: top right,
-    ),*/
-);
+// Susy 2 used half the gutter as margin-right between floated columns.
+// Container = 12 * (4em col + 1em half-gutter) - 1em = 59em.
+$half-gutter:      math.div($gutter-width, 2);
+$container-width:  $total-columns * ($column-width + $half-gutter) - $half-gutter;
 
 /* layouts settings */
 

@@ -1,18 +1,19 @@
-@import "compass/reset";
-@import "compass/typography/vertical_rhythm";
-//@import "vendors/fontawesome/font-awesome";
-
-@import "susy";
+@use "sass:math";
+@import "reset";
 @import "settings";
 @import "mixins";
 @import "layouts";
 @import "fonts";
 
-@include establish-baseline;
+// Replaces: @include establish-baseline
+// Compass output: font-size: 112.5% (= 18/16*100%), line-height: 1.27778em (= 23/18)
+html {
+    font-size: math.div($base-font-size, 16px) * 100%;
+    line-height: math.div($base-line-height, $base-font-size) * 1em;
+}
 
 body {
     @include container;
-
     padding: $grid-padding;
 }
 
@@ -25,7 +26,7 @@ h1 { @include adjust-font-size-to($h1-font-size, $h1-line-multiple); }
 h2 { @include adjust-font-size-to($h2-font-size, $h2-line-multiple); }
 h3 { @include adjust-font-size-to($h3-font-size, $h3-line-multiple); }
 
-p, dt { 
+p, dt {
     -ms-word-break: break-all;
     word-break: break-all;
 
@@ -38,7 +39,7 @@ p, dt {
             hyphens: auto;
 }
 
-a { 
+a {
     text-decoration: none;
     color: inherit;
 
@@ -54,13 +55,13 @@ a {
     &.twitter, &[href*='twitter.com'] { @extend %twitter-icon; }
     &.github, &[href*='github.com'] { @extend %github-icon; }
     &.linkedin, &[href*='linkedin.com'] { @extend %linkedin-icon; }
+    &.instagram, &[href*='instagram.com'] { @extend %instagram-icon; }
 }
 
 /* Header */
 
 header {
-    // header span all grid
-    @include span(last $total-columns of $total-columns);
+    @include span-full;
 
     text-align: center;
 
@@ -76,81 +77,81 @@ header {
 
     [itemprop='address'] { color: $address-color; }
 
-    // xs to small
+    // xs to small: everything stacks full-width
     @media screen and (max-width: $sm-layout-max) {
         #title {
-            @include span(last $total-columns of $total-columns);
-            @include trailer(1); 
+            @include span-full;
+            @include trailer(1);
         }
 
         .details {
-            @include span(last $total-columns of $total-columns);
+            @include span-full;
         }
 
         img {
-            @include trailer(1); 
-            @include span(last $total-columns of $total-columns);
+            @include trailer(1);
+            @include span-full;
         }
     }
 
-    // small
+    // small: center the photo with equal padding
     @media screen and (min-width: $sm-layout-min) and (max-width: $sm-layout-max) {
         img {
-            @include pad(3,3);
+            @include pad(3, 3);
             @include leader(1);
-            @include trailer(1); 
-            @include span($total-columns/2 of $total-columns);
+            @include trailer(1);
+            @include span(6);
         }
     }
 
-    // medium and beyond
+    // medium and beyond: two-column layout
     @media screen and (min-width: $md-layout-min), print, projection {
 
         &.with-photo {
             #title {
-                @include span($total-columns*2/3 of $total-columns);
+                @include span(8);
                 text-align: right;
 
                 h2 { @include trailer(0.5); }
             }
 
             .details {
-                @include span($total-columns*2/3 of $total-columns);
+                @include span(8);
                 margin-left: 0px;
                 text-align: right;
             }
 
             img {
-                @include span(last $total-columns/3 of $total-columns);
+                @include span-last(4);
             }
         }
 
         &:not(.with-photo) {
             #title {
-                @include span(7 of $total-columns);
+                @include span(7);
                 text-align: left;
             }
 
             .details {
-                @include span(last 5 of $total-columns);
+                @include span-last(5);
                 text-align: right;
             }
         }
     }
 
-    // large and beyond
+    // large and beyond: wider layout
     @media screen and (min-width: $lg-layout-min), print, projection {
         &.with-photo {
             #title {
-                @include span(9 of $total-columns);
+                @include span(9);
             }
 
             .details {
-                @include span(9 of $total-columns);
+                @include span(9);
             }
 
             img {
-                @include span(last 3 of $total-columns);
+                @include span-last(3);
             }
         }
     }
@@ -159,31 +160,54 @@ header {
 /* Section */
 
 section {
-    // span all grid
-    @include span(last $total-columns of $total-columns);
+    @include span-full;
 
     // paragraph
 
-    > p { 
+    > p {
         @include leader(1);
-        @include span(last $total-columns of $total-columns);
-        text-align: justify; 
+        @include span-full;
+        text-align: justify;
+    }
+
+    // tighten gap between section title and first content element
+    > h2 + p,
+    > h2 + ul,
+    > h2 + dl { margin-top: 0.35em; }
+
+    // unordered list (experience bullets)
+
+    > ul {
+        margin-top: 0.25em;
+        @include span-full;
+
+        li {
+            padding-left: 1.25em;
+            position: relative;
+
+            &::before {
+                content: '\25CF';
+                position: absolute;
+                left: 0;
+                color: $section-rectangle-color;
+            }
+        }
     }
 
     // headers
 
     > h2 {
         @include leader(1, $h2-font-size);
-        @include span(last $total-columns of $total-columns);
+        @include span-full;
         color: $section-title-color;
 
         &:before {
             content: "";
             display: inline-block;
-            margin-right: gutter();
-            width: span(2) - gutter();
-            height: rhythm($h2-line-multiple/3, $h2-font-size);
-            margin-bottom: rhythm($h2-line-multiple/6, $h2-font-size);
+            margin-right: pct($half-gutter);
+            width: pct(span-width(2) - $half-gutter);
+            height: rhythm(math.div($h2-line-multiple, 3), $h2-font-size);
+            margin-bottom: rhythm(math.div($h2-line-multiple, 6), $h2-font-size);
             background-color: $section-rectangle-color;
         }
     }
@@ -191,47 +215,50 @@ section {
     > h3 {
         @include push(2);
         @include leader(1, $h3-font-size);
-        @include span(10 of $total-columns);
+        @include span(10);
     }
 
     // description list
 
     > dl {
-        @include span(last $total-columns of $total-columns);
+        @include span-full;
 
         dl {
-            @include pull(2 of 10);
+            // pull(2 of 10): -10em relative to the dd parent (span-last 10 = 49em)
+            @include pull(2, span-width(10));
         }
     }
 
-    #{nest('&:not(.listing) > dl', '> dt, > dd')},
-    #{nest('&.listing > dl', '> dt:first-of-type, > dd:first-of-type')} {
-        @include leader(1); 
+    &:not(.listing) > dl > dt,
+    &:not(.listing) > dl > dd,
+    &.listing > dl > dt:first-of-type,
+    &.listing > dl > dd:first-of-type {
+        @include leader(1);
     }
 
     dt {
-        @include span(2 of $total-columns);
+        @include span(2);
         text-align: right;
         clear: both;
     }
 
     dd {
-        @include span(last 10 of $total-columns); 
+        @include span-last(10);
 
         dt {
             font-style: italic;
-        } 
+        }
     }
 
     // jumbotron
 
     &.jumbotron {
-        #{headings(2)} {
+        h2, h3, h4, h5, h6 {
             display: none;
         }
 
         @include leader(1);
-        @include span(last $total-columns of $total-columns);
+        @include span-full;
         @include trailer(1);
 
         &, p {
@@ -240,12 +267,16 @@ section {
     }
 }
 
+/* Education — tighter spacing between entries */
+
+#education > dl > dt,
+#education > dl > dd { margin-top: 0.45em; }
+
 /* Footer */
 
 footer {
-    // header span all grid
-    @include span(last $total-columns of $total-columns);
-    @include rhythm(1, 1);
+    @include span-full;
+    @include rhythm-margin(1, 1);
 
     text-align: center;
 
@@ -276,28 +307,22 @@ footer {
         /* this affects the margin in the printer settings */
         margin: 1.5cm 1.5cm 1.5cm 1.5cm;
         padding: 0;
-
-        /* too bad @page is not well supported */
-
-        // counter-increment: page;
-        // counter-reset: page 1;
-
-        // @bottom-right {
-        //     content: counter(page) " of " counter(pages);
-        // }
     }
 
     // layout
 
     body { min-width: $lg-layout-min; } // in order to have a decent rendering
-    
+
     #qrcode {
-        @include span(2 of 9);
-        max-width: convert-length($qrcode-width, em);
+        @include span(2);
+        max-width: px2em($qrcode-width);
     }
 
+    // empty footer adds phantom space that triggers a blank page
+    footer { margin: 0; padding: 0; }
+
     // page break
-    
+
     h2, h3 { page-break-after: avoid; }
     dt { page-break-after: avoid !important; }
     dd, p { page-break-before: avoid !important;; }

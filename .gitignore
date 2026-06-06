@@ -2,6 +2,8 @@
 .sass-cache
 build
 dist
+node_modules
+cv
 
 # vim
 [._]*.s[a-w][a-z]
