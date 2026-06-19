@@ -111,7 +111,7 @@ The after-body exclusion check in `cmd_html` was refactored from a compound `[[ 
 
 The project was forked from [barraq/pandoc-moderncv](https://github.com/barraq/pandoc-moderncv) and had accumulated significant dependency rot. The core issue was **Compass**, the Ruby-based SCSS compiler and utility framework. Compass is effectively unmaintained and increasingly difficult to install on modern macOS systems — its gem dependencies conflict with current Ruby versions and it relies on native extensions that no longer build cleanly. The companion grid library **Susy 2** is similarly abandoned.
 
-The goal of this session was to eliminate Ruby as a build dependency entirely, replace the legacy SCSS tooling with modern equivalents, simplify the build system, and remove a handful of other outdated artifacts — all without changing the visual output of the resume.
+The goal of this work is to eliminate Ruby as a build dependency entirely, replace the legacy SCSS tooling with modern equivalents, simplify the build system, and remove a handful of other outdated artifacts — all without changing the visual output of the resume.
 
 ---
 

@@ -45,13 +45,15 @@ Live **pdf** preview [here](http://nanotubing.github.io/pandoc-moderncv/preview/
 For building your CV in HTML you need:
 
 - [Node.js & npm](https://nodejs.org/) — for Dart Sass
-- [RSync](http://rsync.samba.org/)
 - [Pandoc](https://pandoc.org/) (>= 1.13)
 
 For exporting your CV to PDF you need:
 
 - [wkhtmltopdf](https://wkhtmltopdf.org/)
 - [ExifTool](https://exiftool.org/)
+
+For deploying your CV you may want rsync
+- [RSync](http://rsync.samba.org/)
 
 ## Installation
 
