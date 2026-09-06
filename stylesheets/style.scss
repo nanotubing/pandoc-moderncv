@@ -180,17 +180,27 @@ section {
     > ul {
         margin-top: 0.25em;
         @include span-full;
+        // span-full sets width:100% + float:right; with the default content-box
+        // sizing the padding-left overflows into the left margin and drags the
+        // marker out there with it. border-box keeps the list box inside the
+        // text column.
+        box-sizing: border-box;
+        // padding-left is the hanging indent: the item text (and any wrapped
+        // lines) sit here, and the outside marker hangs to its left. Tuned so
+        // the bullet lands on the body-text left edge, aligned with the
+        // surrounding paragraphs. Wrapped lines auto-align (outside marker).
+        padding-left: 1.2em;
+        // Native `disc` marker (not a custom `::marker { content }` string,
+        // which Safari/Firefox ignore, and not an absolutely-positioned
+        // ::before). It renders in every browser and is tagged as a list label
+        // (Lbl) in the PDF, so tag-aware parsers see the list structure; because
+        // the disc is a graphical marker, naive text extraction also stays clean
+        // (no stray bullet glyph lands in the copied text).
+        list-style-type: disc;
+        list-style-position: outside;
 
-        li {
-            padding-left: 1.25em;
-            position: relative;
-
-            &::before {
-                content: '\25CF';
-                position: absolute;
-                left: 0;
-                color: $section-rectangle-color;
-            }
+        li::marker {
+            color: $section-rectangle-color;
         }
     }
 

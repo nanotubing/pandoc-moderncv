@@ -26,9 +26,15 @@ DIST_DIR=dist
 IMAGES_DIR=$SRC_DIR/images
 SCAFFOLDS_DIR=scaffolds
 DATE=$(date +'%Y:%m:%d')
-HTMLTOPDF=${HTMLTOPDF:-wkhtmltopdf}
 PRIVATE_CV=${private_cv:-false}
 PUBLIC_CV=${public_cv:-false}
+
+# Browser used to render the PDF (scripts/html2pdf.mjs). Options:
+#   chrome   - system-installed Google Chrome (default; no download needed)
+#   bundled  - Chromium managed by Puppeteer, for machines without Chrome;
+#              install it once with `npm run install-browser`
+#   <path>   - an explicit browser executable path
+PDF_BROWSER=${PDF_BROWSER:-chrome}
 
 # ---- Targets ----
 
@@ -103,26 +109,26 @@ cmd_pdf() {
         --wrap=none \
         --variable=date:"$DATE" \
         --output "$BUILD_DIR/pdftags.txt" "$SRC_DIR/cv.md"
-    # wkhtmltopdf resolves @font-face URLs relative to the HTML file, not the CSS
-    # file. Putting the PDF CSS alongside cv.html (in dist/) and rewriting font
-    # paths from ../fonts/ to fonts/ makes both resolve to dist/fonts/ correctly.
+    # pandoc backslash-escapes literal "|" characters in metadata when
+    # stringifying $title$ through the metadata template, so a title containing
+    # them would otherwise land in the PDF Title as "... \| ...". Unescape it.
+    sed 's/\\|/|/g' "$BUILD_DIR/pdftags.txt" > "$BUILD_DIR/pdftags.clean" \
+        && mv "$BUILD_DIR/pdftags.clean" "$BUILD_DIR/pdftags.txt"
+    # Put the PDF CSS alongside cv.html (in dist/) and rewrite font paths from
+    # ../fonts/ to fonts/ so both the HTML and the CSS resolve @font-face URLs to
+    # dist/fonts/. (wkhtmltopdf resolved @font-face relative to the HTML file; this
+    # layout is also correct for Chrome, which resolves relative to the CSS file.)
     sed 's|\.\./fonts/|fonts/|g' \
         "$DIST_DIR/stylesheets/style.css" > "$DIST_DIR/style-pdf.css"
     sed 's|href="stylesheets/style.css"|href="style-pdf.css"|' \
         "$DIST_DIR/cv.html" > "$DIST_DIR/cv-pdf.html"
 
-    # wkhtmltopdf's QtWebKit loads @font-face fonts asynchronously and may snapshot
-    # the page for printing before FontAwesome finishes loading, dropping the
-    # external-link/contact glyphs (the :before icons). This race surfaces on the
-    # shorter public CV, which renders fast enough to beat the font load.
-    # --javascript-delay gives the font time to arrive before the snapshot.
-    # See proposed_changes.md (#12) for the more robust data-URI font embed.
-    wkhtmltopdf \
-        --enable-local-file-access \
-        --print-media-type \
-        --page-size Letter \
-        --javascript-delay 1500 \
-        "$DIST_DIR/cv-pdf.html" "$DIST_DIR/cv.pdf"
+    # Render with headless Chrome via Puppeteer (scripts/html2pdf.mjs). Chrome
+    # produces correct reading order and tagged (ATS-parseable) PDFs, and waits
+    # for @font-face fonts deterministically, so the FontAwesome load race that
+    # required wkhtmltopdf's --javascript-delay no longer applies. Letter size,
+    # margins, and background printing are configured in the helper script.
+    PDF_BROWSER="$PDF_BROWSER" node scripts/html2pdf.mjs "$DIST_DIR/cv-pdf.html" "$DIST_DIR/cv.pdf"
 
     xargs exiftool "$DIST_DIR/cv.pdf" < "$BUILD_DIR/pdftags.txt"
 }
@@ -141,7 +147,6 @@ cmd_clean() {
 }
 
 cmd_build() {
-    #preserve private resume before we build the public
     PRIVATE_CV=true cmd_pdf
     set -x  # Enable command echoing
     cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/cv_private.pdf"
@@ -150,7 +155,6 @@ cmd_build() {
     set +x  # Disable command echoing
 
     PUBLIC_CV=true cmd_pdf
-    #also rename and preserve the public resume
     set -x  # Enable command echoing
     cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/cv_public.pdf"
     cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/John_Doe.pdf"

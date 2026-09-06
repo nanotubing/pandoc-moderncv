@@ -2,7 +2,8 @@
 .sass-cache
 build
 dist
-node_modules
+.claude
+node_modules/
 cv
 
 # vim

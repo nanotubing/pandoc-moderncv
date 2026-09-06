@@ -18,7 +18,8 @@ Pandoc-ModernCV currently supports **pdf** and **html5** export formats. The htm
     + print layout
 - export to PDF
     + Letter format ready
-    + PDF tags (title, author, etc.)
+    + PDF metadata (title, author, etc.)
+    + tagged (accessible / ATS-friendly) structure
 - publish public & private CV
 
 ## Preview & Screenshots
@@ -45,25 +46,27 @@ Live **pdf** preview [here](http://nanotubing.github.io/pandoc-moderncv/preview/
 For building your CV in HTML you need:
 
 - [Node.js & npm](https://nodejs.org/) — for Dart Sass
+- [RSync](http://rsync.samba.org/)
 - [Pandoc](https://pandoc.org/) (>= 1.13)
 
 For exporting your CV to PDF you need:
 
-- [wkhtmltopdf](https://wkhtmltopdf.org/)
+- [Google Chrome](https://www.google.com/chrome/) — the PDF is rendered with headless Chrome via [Puppeteer](https://pptr.dev/) (installed by `npm install`). On a machine without Chrome, a Puppeteer-managed Chromium can be used instead (see Installation).
 - [ExifTool](https://exiftool.org/)
-
-For deploying your CV you may want rsync
-- [RSync](http://rsync.samba.org/)
 
 ## Installation
 
-Install Node.js dependencies (Dart Sass):
+Install Node.js dependencies (Dart Sass and Puppeteer):
 
     $ npm install
 
-Install **wkhtmltopdf** via Homebrew (macOS):
+This does **not** download a browser. By default the PDF build uses your
+system-installed **Google Chrome**. To render with a Puppeteer-managed Chromium
+instead — e.g. on a machine without Chrome — install one once:
 
-    $ brew install wkhtmltopdf
+    $ npm run install-browser
+
+and set `PDF_BROWSER=bundled` when building (see below).
 
 Install **Pandoc** via Homebrew or the [official installer](https://pandoc.org/installing.html):
 
@@ -73,7 +76,7 @@ Install **ExifTool** via Homebrew:
 
     $ brew install exiftool
 
-**rsync** is pre-installed on macOS. You are done!
+**rsync** is pre-installed on macOS. On other systems you may need to install it via your package manager (e.g. `apt install rsync`, `dnf install rsync`, or `pacman -S rsync`). You are done!
 
 ## Getting Started
 
@@ -98,6 +101,30 @@ To deploy, edit the destination path in `cmd_deploy` (in `build.sh`), then run:
 
     $ ./build.sh deploy
 
+### PDF rendering
+
+The PDF is rendered by headless Chrome via Puppeteer (`scripts/html2pdf.mjs`),
+which produces a **tagged, ATS-friendly** PDF. Which browser it uses is
+controlled by the `PDF_BROWSER` setting:
+
+| `PDF_BROWSER` | Browser used |
+| :--- | :--- |
+| `chrome` (default) | System-installed Google Chrome; no download |
+| `bundled` | Puppeteer-managed Chromium (`npm run install-browser` first) |
+| `<path>` | An explicit browser executable |
+
+You can set it either way:
+
+- **As an environment variable**, to override the default for a single build:
+
+      $ PDF_BROWSER=bundled ./build.sh build
+
+- **By editing `build.sh`**, to change the default permanently — update the line near the top of the file:
+
+      PDF_BROWSER=${PDF_BROWSER:-chrome}   # change "chrome" to e.g. "bundled"
+
+  Because of the `${PDF_BROWSER:-chrome}` form, an environment variable (when set) still takes precedence over this default.
+
 ## Build Commands
 
 | Command | Description |
@@ -112,6 +139,23 @@ To deploy, edit the destination path in `cmd_deploy` (in `build.sh`), then run:
 | `./build.sh clean` | Remove dist/ and build/ |
 | `./build.sh build` | Build both private and public CV variants |
 | `./build.sh deploy` | Copy public CV to the site directory set in `build.sh` |
+
+## ATS Legibility
+
+Many employers screen resumes with an **Applicant Tracking System (ATS)** — software that parses a PDF's text and sorts it into fields (name, contact details, work history, skills) before a human reads it. When the parser garbles or drops content, strong applications get filtered out for reasons unrelated to the candidate. Pandoc-ModernCV is built to parse cleanly.
+
+**What should happen when this CV is scanned:**
+
+- **Real, selectable text** — the PDF is text, not an image, so every character is extractable without OCR.
+- **Correct reading order** — the PDF is *tagged* (it carries a logical structure tree), so a parser reads it in the intended order: each job's title and dates, then that job's bullets, then the next job — not a scrambled dump.
+- **Bullets read as a list** — experience bullets use native list markers, so the PDF carries real list structure (tagged list items) and each bullet's text extracts on its own clean line — no bullet glyph mixed into the copied text, and none of the markers drifting onto separate lines the way an absolutely-positioned bullet would.
+- **Keywords match** — skills and technologies extract as plain ASCII, so a recruiter's keyword search finds them; typographic ligatures that would turn a word like "Leaflet" into an unmatchable "Leaﬂet" are decomposed by the renderer.
+- **Clean metadata** — the PDF `Title`, `Author`, and `Subject` fields come from your CV metadata, which some systems read directly.
+- **Familiar structure** — a single-column body, conventional section headings (Experience, Education, Skills…), and `Month YYYY` date ranges are all shapes parsers expect.
+
+**Why it matters:** an ATS that misreads the reading order can staple your bullets to the wrong job, skip a keyword because of a stray ligature, or lose a detail in surrounding noise — and each of those is a silent rejection you never find out about. A tagged PDF with clean, in-order text is what separates being parsed *accurately* from being parsed *wrong*.
+
+**Check it yourself:** open the PDF, select all, copy, and paste into a plain-text editor. It should read top-to-bottom in the right order, each bullet on its own line with its text, and your contact details intact. The renderer that produces this is described under [PDF rendering](#pdf-rendering).
 
 ## Customize
 

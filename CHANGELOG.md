@@ -1,5 +1,57 @@
 # Changelog
 
+## 2.1 — 2026-07-27
+
+ATS-legibility release. The PDF renderer moves off the unmaintained wkhtmltopdf to headless Chrome, which produces a *tagged* PDF with a declared reading order and decomposes typographic ligatures — the two properties that most affect how a CV parses in an Applicant Tracking System. Two follow-up fixes to the list markers and the `Title` metadata complete the change. There is no intended change to the visual output.
+
+### 2026-07-27 — PDF renderer: wkhtmltopdf → headless Chrome (Puppeteer)
+
+#### Switched the PDF renderer to headless Chrome via Puppeteer (`build.sh`, `scripts/html2pdf.mjs`)
+
+The PDF build no longer uses **wkhtmltopdf** (an unmaintained engine built on Qt 4.8 WebKit). `cmd_pdf` now renders `dist/cv-pdf.html` with **headless Google Chrome driven by Puppeteer** (new helper `scripts/html2pdf.mjs`).
+
+**Why this improves ATS legibility.** Applicant Tracking Systems read the PDF's text layer, and two properties of the old wkhtmltopdf output degraded that:
+
+- **Untagged output.** wkhtmltopdf produced an *untagged* PDF (no structure tree), so a parser had no declared reading order and had to reconstruct one from glyph coordinates — fragile on this floated, partly two-column layout. Chrome emits a **tagged PDF** (`StructTreeRoot`, `MarkInfo /Marked true`) whose logical structure follows the HTML source order, giving ATS and assistive tech an explicit, correct reading order instead of a guess.
+- **Ligatures broke keyword matching.** Palatino renders "fl"/"fi" as single ligature glyphs. wkhtmltopdf exported those as the ligature codepoint (e.g. `ﬂ`, U+FB02), so a word like "Leaflet" extracted as "Leaﬂet" and would never match a recruiter's keyword search (any word containing "fl" or "fi" was affected). Chrome's text extraction decomposes them to plain ASCII, so such words now **extract as matchable text**.
+
+Deterministic font loading is a further benefit: the helper awaits `document.fonts.ready` before printing, guaranteeing FontAwesome and all `@font-face` assets are painted. This **retires the `--javascript-delay 1500` workaround** (see 2026-06-04) and the never-implemented data-URI font-embed follow-up it pointed to — both existed only to paper over wkhtmltopdf's async font-load race.
+
+Rendering details handled in `scripts/html2pdf.mjs`:
+
+- **Scale-to-fit.** The moderncv print layout is a fixed ~1060px desktop grid (`min-width: $lg-layout-min`). wkhtmltopdf shrank it to the paper via its "smart shrinking" feature; Chrome does not, so the helper measures the laid-out width (`document.body.offsetWidth`) and sets `page.pdf({ scale })` to fit the printable area, reproducing the previous proportions. Without it the layout overflows and clips off the right edge.
+- Page geometry (Letter, 0.5in margins), background printing (the colored section markers), and tagged output are all configured in the `page.pdf()` call rather than relying on CSS `@page`.
+
+#### Configurable browser via `PDF_BROWSER` (`build.sh`, `scripts/html2pdf.mjs`, `puppeteer.config.cjs`)
+
+The renderer uses the full **`puppeteer`** package (rather than `puppeteer-core`, which is the "bring your own browser" build and cannot supply a Chromium). `PDF_BROWSER` in `build.sh` selects the browser:
+
+- `chrome` (default) — the system-installed Google Chrome; no download.
+- `bundled` — a Puppeteer-managed Chromium, for machines without Chrome; install it once with `npm run install-browser`.
+- `<path>` — an explicit browser executable.
+
+`puppeteer.config.cjs` sets `skipDownload: true` so `npm install` stays lean (no automatic ~150 MB Chromium download); the managed browser is fetched only on demand by `npm run install-browser`.
+
+### 2026-07-27 — ATS legibility: native list bullets & clean Title metadata
+
+Two follow-ups to the headless-Chrome renderer switch, both improving how the PDF parses in an Applicant Tracking System.
+
+#### Experience bullets: native markers, aligned with the text (`stylesheets/style.scss`)
+
+The experience bullets were drawn with an absolutely-positioned pseudo-element (`li::before { content: '\25CF'; position: absolute }`). Because that marker is out-of-flow generated content, it was written into the PDF *after* each line's text — so a naive content-stream / copy-paste extraction read the `●` on its own line after the bullet text, and the floated layout further clumped every job header before every bullet.
+
+Replaced it with a **native `list-style-type: disc` marker** (`list-style-position: outside`) on the experience `> ul`, tinted via `li::marker { color: $section-rectangle-color }`. The marker is now in-flow and tagged as a list label (`Lbl`), so tag-aware parsers read a real list structure and the bullets interleave correctly with the job they belong to. Because `disc` is a *graphical* marker rather than a text glyph, naive extraction is also **cleaner** than before: each bullet line comes out as pure text with no stray `●` character injected.
+
+`disc` specifically — rather than a custom `list-style-type: '\25CF'` string or a `::marker { content }` bullet — because those custom-marker techniques are **Chrome-only**. Safari and Firefox ignore them, which left the on-screen HTML with no visible bullets at all (the CSS reset sets `list-style: none`, so there was no fallback).
+
+**Alignment and spacing** were corrected at the same time. `@include span-full` gives the `<ul>` `width: 100%` + `float: right`; with the default `content-box` sizing the `padding-left` overflowed past that width and pushed the marker into the left margin, hard against the text. Adding `box-sizing: border-box` keeps the list box inside the text column, and `padding-left: 1.2em` acts as a hanging indent — the disc now sits on the body-text left edge (aligned with the surrounding paragraphs and job titles), with a clear gap to the item text and wrapped lines self-aligning to that text.
+
+#### Clean PDF `Title` metadata (`build.sh`, `cmd_pdf`)
+
+A CV `title:` may use literal `|` separators; pandoc backslash-escapes them when stringifying `$title$` through `templates/pdf.metadata`, so a title like `Jane Doe | Engineer` landed in the PDF `Title` as `Jane Doe \| Engineer`. `cmd_pdf` now unescapes `build/pdftags.txt` (`sed 's/\\|/|/g'`) before ExifTool writes it, so the `Title` — which some ATS read directly — is clean.
+
+---
+
 ## 2.0 — 2026-06-05
 
 First public release of the modernized toolchain: Ruby, Compass, and Susy replaced with Dart Sass (via npm) and a `build.sh` driver, with no change to the visual output. The dated entries below detail the individual changes that make up this release.
@@ -14,7 +66,7 @@ FontAwesome glyphs (the external-link icon before each company entry, contact ic
 
 Root cause: wkhtmltopdf's QtWebKit engine loads `@font-face` fonts asynchronously and sometimes snapshots the page for printing before FontAwesome finishes loading, leaving the `:before` pseudo-element glyphs unpainted. The font file is still embedded in the PDF (eventually pulled in), but the icons never paint. The shorter public document renders fast enough to beat the font load and lose the glyphs; the longer private document renders slowly enough that the font arrives first. Because it is a timing race, it is sensitive to system load and presents as intermittent.
 
-Fixed by adding `--javascript-delay 1500` to the `wkhtmltopdf` invocation in `cmd_pdf`, which gives the font time to load before the print snapshot. This is a timing-based workaround; see `proposed_changes.md` (#12) for the robust permanent fix (embedding the font as a base64 `data:` URI so it loads synchronously).
+Fixed by adding `--javascript-delay 1500` to the `wkhtmltopdf` invocation in `cmd_pdf`, which gives the font time to load before the print snapshot. This is a timing-based workaround; the robust permanent fix considered at the time was embedding the font as a base64 `data:` URI so it loads synchronously. (Superseded by the 2.1 renderer switch, which removed the race at its source.)
 
 ---
 
