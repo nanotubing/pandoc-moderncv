@@ -1,3 +1,111 @@
+@use "sass:math";
+
+// ---- Unit conversion ----
+
 @function px2em($px, $base: $base-font-size) {
-    @return ($px / $base) * 1em;
+    @return math.div($px, $base) * 1em;
+}
+
+// ---- Vertical Rhythm ----
+// Replaces: compass/typography/vertical_rhythm
+//
+// rhythm(N, $font-size) returns N rhythm units expressed as em
+// relative to $font-size. Matches Compass output exactly.
+
+@function rhythm($lines: 1, $font-size: $base-font-size) {
+    @return math.div($lines * $base-line-height, $font-size) * 1em;
+}
+
+@mixin adjust-font-size-to($size, $lines: 1) {
+    font-size: math.div($size, $base-font-size) * 1em;
+    line-height: math.div($lines * $base-line-height, $size) * 1em;
+}
+
+@mixin leader($lines: 1, $font-size: $base-font-size) {
+    margin-top: math.div($lines * $base-line-height, $font-size) * 1em;
+}
+
+@mixin trailer($lines: 1, $font-size: $base-font-size) {
+    margin-bottom: math.div($lines * $base-line-height, $font-size) * 1em;
+}
+
+// rhythm-margin: replaces Compass @include rhythm($leader, $trailer)
+// Compass rhythm also sets padding-top and padding-bottom equal to the margins.
+@mixin rhythm-margin($leader: 0, $trailer: 0, $font-size: $base-font-size) {
+    $value: math.div($base-line-height, $font-size) * 1em;
+    @if $leader > 0 {
+        margin-top:    $leader  * $value;
+        padding-top:   $leader  * $value;
+    }
+    @if $trailer > 0 {
+        padding-bottom: $trailer * $value;
+        margin-bottom:  $trailer * $value;
+    }
+}
+
+// ---- Float Grid ----
+// Replaces: Susy 2 (compass compile --require susy)
+//
+// Produces percentage-based widths matching Susy 2's output.
+// Container: $total-columns * ($column-width + $half-gutter) - $half-gutter
+//   = 12 * 5em - 1em = 59em
+// span(n) width:  (n*5 - 1) / 59 * 100%
+// margin-right:   1 / 59 * 100%  (= half-gutter, between floated items)
+//
+// $half-gutter and $container-width are defined in _layouts.scss.
+
+@function span-width($n) {
+    @return $n * ($column-width + $half-gutter) - $half-gutter;
+}
+
+@function pct($value, $context: $container-width) {
+    @return math.div($value, $context) * 100%;
+}
+
+@mixin container {
+    max-width: $container-width;
+    margin-left: auto;
+    margin-right: auto;
+    &:after {
+        content: " ";
+        display: block;
+        clear: both;
+    }
+}
+
+// span(n): float left, n columns wide
+@mixin span($n) {
+    float: left;
+    width: pct(span-width($n));
+    margin-right: pct($half-gutter);
+}
+
+// span-last(n): last item in row, floats to right edge
+@mixin span-last($n) {
+    float: right;
+    width: pct(span-width($n));
+    margin-right: 0;
+}
+
+// span-full: full-width element, clears floats
+@mixin span-full {
+    width: 100%;
+    float: right;
+    margin-right: 0;
+}
+
+// push(n): offset element left by n columns
+@mixin push($n) {
+    margin-left: pct(span-width($n) + $half-gutter);
+}
+
+// pull(n): negative offset by n columns (used for nested dl indent)
+@mixin pull($n, $context: $container-width) {
+    margin-left: pct(-(span-width($n) + $half-gutter), $context);
+}
+
+// pad(left, right): column-based padding
+@mixin pad($left: 0, $right: 0) {
+    @if $left  > 0 { padding-left:  pct($left  * ($column-width + $half-gutter)); }
+    @if $right > 0 { padding-right: pct($right * ($column-width + $half-gutter)); }
 }

@@ -12,10 +12,7 @@
   $endif$
   <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
   <style type="text/css">code{white-space: pre;}</style>
-  <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
-  $if(quotes)$
+$if(quotes)$
   <style type="text/css">q { quotes: "“" "”" "‘" "’"; }</style>
   $endif$
   $for(css)$
@@ -26,7 +23,7 @@
   $endfor$
 </head>
 <body>
-  <header itemscope itemtype="http://http://schema.org/Person" class="$if(photo)$with-photo$endif$">
+  <header itemscope itemtype="http://schema.org/Person" class="$if(photo)$with-photo$endif$">
     <div id="title" class="$if(qrcode)$qrcode$endif$">
       $if(qrcode)$
       <img id="qrcode" src="$qrcode$" />
@@ -90,8 +87,14 @@
       $if(settings.protect-address)$
       $if(privatecv)$
       <li itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
+        $if(address.street)$
+        <span itemprop="streetAddress">$address.street$</span>
+        $endif$
         $if(address.city)$
         <span itemprop="addressLocality">$address.city$</span>
+        $endif$
+        $if(address.zip)$
+        <span itemprop="postalCode">$address.zip$</span>
         $endif$
         $if(address.country)$
         <span itemprop="addressCountry">$address.country$</span>
@@ -100,8 +103,14 @@
       $endif$
       $else$
       <li itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
+        $if(address.street)$
+        <span itemprop="streetAddress">$address.street$</span>
+        $endif$
         $if(address.city)$
         <span itemprop="addressLocality">$address.city$</span>
+        $endif$
+        $if(address.zip)$
+        <span itemprop="postalCode">$address.zip$</span>
         $endif$
         $if(address.country)$
         <span itemprop="addressCountry">$address.country$</span>

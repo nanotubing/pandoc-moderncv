@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "install-browser": "puppeteer browsers install chrome"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.4.0",
+    "sass": "^1.77.0"
+  }
+}
