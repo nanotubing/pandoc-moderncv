@@ -1,4 +1,6 @@
 {
+  "name": "pandoc-markdownresume",
+  "private": true,
   "scripts": {
     "install-browser": "puppeteer browsers install chrome"
   },

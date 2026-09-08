@@ -7,7 +7,7 @@
 // (networkidle0 + document.fonts.ready), which retires the FontAwesome load
 // race that QtWebKit/wkhtmltopdf worked around with --javascript-delay.
 //
-// Scale-to-fit: the moderncv print layout is a fixed ~1060px-wide desktop grid
+// Scale-to-fit: the print layout is a fixed ~1060px-wide desktop grid
 // (forced via `min-width: $lg-layout-min` in the print @media block). wkhtmltopdf
 // shrank that to the paper width via its "smart shrinking" feature; Chrome does
 // not, so without help the layout overflows and clips off the right edge. We

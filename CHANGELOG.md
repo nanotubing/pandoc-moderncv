@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### 2026-09-07 — Renamed the project to Pandoc-MarkdownResume
+
+The repository is now `nanotubing/Pandoc-MarkdownResume` (formerly `pandoc-moderncv`); GitHub redirects the old URLs. The checked-in files were updated to match:
+
+- **`templates/pdf.metadata`** — the ExifTool `Creator` field stamped into every exported PDF is now `Pandoc-MarkdownResume`. This is the only user-visible artifact of the rename outside the docs.
+- **`README.md`** — product name in prose, plus the GitHub Pages preview links and the `gh-pages` screenshot URLs, which now point at the new repo name (and use `https://` / `raw.githubusercontent.com` instead of the legacy `raw.github.com` redirect). A note records the former name.
+- **`package.json` / `package-lock.json`** — the package is now named `pandoc-markdownresume` and marked `private`. `package.json` previously had no `name`, so npm derived the lock's name from the checkout directory; pinning it keeps the lockfile stable across clones.
+- **`build.sh`, `scripts/html2pdf.mjs`** — header/inline comments only; no build logic depends on the project name.
+
+Historical entries below are left as written, and the upstream fork attribution to [barraq/pandoc-moderncv](https://github.com/barraq/pandoc-moderncv) is unchanged — that project keeps its own name.
+
 ## 2.1 — 2026-07-27
 
 ATS-legibility release. The PDF renderer moves off the unmaintained wkhtmltopdf to headless Chrome, which produces a *tagged* PDF with a declared reading order and decomposes typographic ligatures — the two properties that most affect how a CV parses in an Applicant Tracking System. Two follow-up fixes to the list markers and the `Title` metadata complete the change. There is no intended change to the visual output.

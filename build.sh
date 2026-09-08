@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# build.sh - Build and deploy script for pandoc-moderncv
+# build.sh - Build and deploy script for Pandoc-MarkdownResume
 # Replaces Makefile + old build.sh (deployment wrapper)
 #
 # Usage:

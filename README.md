@@ -1,16 +1,15 @@
-**Pandoc-ModernCV** provides Pandoc fa­cil­i­ties for type­set­ting modern **cur­ricu­lums vi­tae in markdown**. Inspired by the well known Latex ModernCV, it is fairly cus­tomiz­able, al­low­ing you to use predefined themes and to define your own style by changing colors, fonts, etc.
+**Pandoc-MarkdownResume** A modern resume generation tool built on the original [barraq/pandoc-moderncv](https://github.com/barraq/pandoc-moderncv). The build toolchain has been modernized: Ruby, Compass, and Susy have been replaced with Dart Sass (via npm) and a plain bash script. THis tool is fairly cus­tomiz­able, al­low­ing you to use predefined themes and to define your own style by changing colors, fonts, etc.
 
-> With **Pandoc-ModernCV** simply **write your CV in Markdown**, compile it and publish it in a snap!
+With **Pandoc-MarkdownResume** simply **write your resume in Markdown**, compile it and publish it in a snap!
 
-Pandoc-ModernCV currently supports **pdf** and **html5** export formats. The html5 output is responsive and supports rendering for small to large screens.
+Pandoc-MarkdownResume currently supports **pdf** and **html5** export formats. The html5 output is responsive and supports rendering for small to large screens.
 
-> A modern resume generation tool built on the original [barraq/pandoc-moderncv](https://github.com/barraq/pandoc-moderncv). The build toolchain has been modernized: Ruby, Compass, and Susy have been replaced with Dart Sass (via npm) and a plain bash script.
+
+**Note:** this project was previously named *Pandoc-ModernCV*. The repository is now `nanotubing/Pandoc-MarkdownResume`; old links redirect.
 
 ## Features
 
-> Writing a CV has never been so simple!
-
-- write your CV in Markdown
+- write your resume in Markdown
 - choose between themes
 - customize your style
 - export to HTML5
@@ -20,41 +19,43 @@ Pandoc-ModernCV currently supports **pdf** and **html5** export formats. The htm
     + Letter format ready
     + PDF metadata (title, author, etc.)
     + tagged (accessible / ATS-friendly) structure
-- publish public & private CV
+- publish public & private resume versions
 
 ## Preview & Screenshots
 
 ### HTML5
 
-Live **html5** preview [here](http://nanotubing.github.io/pandoc-moderncv/preview/cv.html)
+Live **html5** preview [here](https://nanotubing.github.io/Pandoc-MarkdownResume/preview/cv.html)
 
-| ![Pandoc-ModernCV large-screen preview ](https://raw.github.com/nanotubing/pandoc-moderncv/gh-pages/media/images/large-screen.png) |
+| ![Pandoc-MarkdownResume large-screen preview ](https://raw.githubusercontent.com/nanotubing/Pandoc-MarkdownResume/gh-pages/media/images/large-screen.png) |
 | :----: |
-| **Screenshot of the HTML scaffold CV taken for a large screen.**  |
-| See also [medium-screen preview](https://raw.github.com/nanotubing/pandoc-moderncv/gh-pages/media/images/medium-screen.png) or [small-screen preview](https://raw.github.com/nanotubing/pandoc-moderncv/gh-pages/media/images/small-screen.png) |
+| **Screenshot of the HTML scaffold resume taken for a large screen.**  |
+| See also [medium-screen preview](https://raw.githubusercontent.com/nanotubing/Pandoc-MarkdownResume/gh-pages/media/images/medium-screen.png) or [small-screen preview](https://raw.githubusercontent.com/nanotubing/Pandoc-MarkdownResume/gh-pages/media/images/small-screen.png) |
 
 ### PDF
 
-Live **pdf** preview [here](http://nanotubing.github.io/pandoc-moderncv/preview/cv.pdf)
+Live **pdf** preview [here](https://nanotubing.github.io/Pandoc-MarkdownResume/preview/cv.pdf)
 
-| ![Pandoc-ModernCV PDF export preview ](https://raw.github.com/nanotubing/pandoc-moderncv/gh-pages/media/images/cv-pdf.png) |
+| ![Pandoc-MarkdownResume PDF export preview ](https://raw.githubusercontent.com/nanotubing/Pandoc-MarkdownResume/gh-pages/media/images/cv-pdf.png) |
 | :----: |
-| **Screenshot of the PDF scaffold CV.** Notice the QR-Code  |
+| **Screenshot of the PDF scaffold resume.** Notice the QR-Code  |
 
 ## Requirements
 
-For building your CV in HTML you need:
+For building your resume in HTML you need:
 
 - [Node.js & npm](https://nodejs.org/) — for Dart Sass
 - [RSync](http://rsync.samba.org/)
 - [Pandoc](https://pandoc.org/) (>= 1.13)
 
-For exporting your CV to PDF you need:
+For exporting your resume to PDF you need:
 
 - [Google Chrome](https://www.google.com/chrome/) — the PDF is rendered with headless Chrome via [Puppeteer](https://pptr.dev/) (installed by `npm install`). On a machine without Chrome, a Puppeteer-managed Chromium can be used instead (see Installation).
 - [ExifTool](https://exiftool.org/)
 
 ## Installation
+
+Installation instructions target MacOS, but this should probably run without issue in Linux systems.
 
 Install Node.js dependencies (Dart Sass and Puppeteer):
 
@@ -85,7 +86,7 @@ The simplest way to get started is to use the provided scaffold:
     $ ./build.sh scaffold
     $ ./build.sh html
 
-This creates a starter CV in the `cv/` directory and builds an HTML version. To open it:
+This creates a starter resume in the `cv/` directory and builds an HTML version. To open it:
 
     $ open dist/cv.html
 
@@ -137,20 +138,20 @@ You can set it either way:
 | `./build.sh pdf` | Build PDF from HTML |
 | `./build.sh scaffold` | Create starter cv/ directory |
 | `./build.sh clean` | Remove dist/ and build/ |
-| `./build.sh build` | Build both private and public CV variants |
-| `./build.sh deploy` | Copy public CV to the site directory set in `build.sh` |
+| `./build.sh build` | Build both private and public resume variants |
+| `./build.sh deploy` | Copy public resume to the site directory set in `build.sh` |
 
 ## ATS Legibility
 
-Many employers screen resumes with an **Applicant Tracking System (ATS)** — software that parses a PDF's text and sorts it into fields (name, contact details, work history, skills) before a human reads it. When the parser garbles or drops content, strong applications get filtered out for reasons unrelated to the candidate. Pandoc-ModernCV is built to parse cleanly.
+Many employers screen resumes with an **Applicant Tracking System (ATS)** — software that parses a PDF's text and sorts it into fields (name, contact details, work history, skills) before a human reads it. When the parser garbles or drops content, strong applications get filtered out for reasons unrelated to the candidate. Pandoc-MarkdownResume is built to parse cleanly.
 
-**What should happen when this CV is scanned:**
+**What should happen when this resume is scanned:**
 
 - **Real, selectable text** — the PDF is text, not an image, so every character is extractable without OCR.
 - **Correct reading order** — the PDF is *tagged* (it carries a logical structure tree), so a parser reads it in the intended order: each job's title and dates, then that job's bullets, then the next job — not a scrambled dump.
 - **Bullets read as a list** — experience bullets use native list markers, so the PDF carries real list structure (tagged list items) and each bullet's text extracts on its own clean line — no bullet glyph mixed into the copied text, and none of the markers drifting onto separate lines the way an absolutely-positioned bullet would.
 - **Keywords match** — skills and technologies extract as plain ASCII, so a recruiter's keyword search finds them; typographic ligatures that would turn a word like "Leaflet" into an unmatchable "Leaﬂet" are decomposed by the renderer.
-- **Clean metadata** — the PDF `Title`, `Author`, and `Subject` fields come from your CV metadata, which some systems read directly.
+- **Clean metadata** — the PDF `Title`, `Author`, and `Subject` fields come from your resume metadata, which some systems read directly.
 - **Familiar structure** — a single-column body, conventional section headings (Experience, Education, Skills…), and `Month YYYY` date ranges are all shapes parsers expect.
 
 **Why it matters:** an ATS that misreads the reading order can staple your bullets to the wrong job, skip a keyword because of a stray ligature, or lose a detail in surrounding noise — and each of those is a silent rejection you never find out about. A tagged PDF with clean, in-order text is what separates being parsed *accurately* from being parsed *wrong*.
@@ -161,7 +162,7 @@ Many employers screen resumes with an **Applicant Tracking System (ATS)** — so
 
 ### Metadata
 
-Your CV can be customized with metadata. Metadata are located between two --- separators at the top of the cv.md file and are formated using the YAML format:
+Your resume can be customized with metadata. Metadata are located between two --- separators at the top of the cv.md file and are formated using the YAML format:
 
     ---
     lang: en
@@ -179,9 +180,9 @@ Your CV can be customized with metadata. Metadata are located between two --- se
       protect-email: true
     ---
 
-    put here your *CV* data
+    put here your *resume* data
 
-Currently Pandoc-ModernCV supports the following metadata:
+Currently Pandoc-MarkdownResume supports the following metadata:
 
 | key                     |  type    | value                          |
 | :---------------------- | :------: | :----------------------------- |
@@ -211,20 +212,20 @@ Currently Pandoc-ModernCV supports the following metadata:
 | protect-address         | boolean  | true/false (default: false)    |
 | display-lastupdate      | boolean  | true/false (default: false)    |
 
-### Private & Public CV
+### Private & Public resume
 
-It is often handy to hide/show specific information in your CV depending on where it is published/sent. Pandoc-ModernCV supports **public** and **private** CVs:
+It is often handy to hide/show specific information in your resume depending on where it is published/sent. Pandoc-MarkdownResume supports **public** and **private** versions:
 
 * when **public**:
     - protected metadata are removed.
-    - *cv/public.md* is displayed just after the header and before the CV body.
+    - *cv/public.md* is displayed just after the header and before the resume body.
 * when **private**:
     - protected metadata are displayed.
-    - *cv/private.md* is displayed just after the header and before the CV body.
+    - *cv/private.md* is displayed just after the header and before the resume body.
 
 #### Protecting Metadata
 
-Currently Pandoc-ModernCV can protect the following metadata:
+Currently Pandoc-MarkdownResume can protect the following metadata:
 
 * email
 * mobile
@@ -241,21 +242,21 @@ Metadata can be (un)protected independently:
       protect-email: false # this unprotects *email*
     ---
 
-#### Building Private/Public CV
+#### Building Private/Public resume
 
-The variant is selected with an environment variable. To build a public CV:
+The variant is selected with an environment variable. To build a public resume:
 
     $ public_cv=true ./build.sh html
     $ public_cv=true ./build.sh pdf
 
-To build a private CV:
+To build a private resume:
 
     $ private_cv=true ./build.sh html
     $ private_cv=true ./build.sh pdf
 
 ### Themes
 
-Currently pandoc-moderncv supports a single theme: classic.
+Currently Pandoc-MarkdownResume supports a single theme: classic.
 
 > Feel free to contribute and send your custom theme!
 
