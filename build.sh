@@ -12,7 +12,7 @@
 #   ./build.sh scaffold      # create starter cv/ directory
 #   ./build.sh clean         # remove dist/ and build/
 #   ./build.sh build         # build both private and public CV variants (PDF + HTML)
-#   ./build.sh deploy        # copy pre-built public CV to example.com
+#   ./build.sh deploy        # run the deploy() function defined in cv/build.conf
 
 set -euo pipefail
 
@@ -35,6 +35,19 @@ PUBLIC_CV=${public_cv:-false}
 #              install it once with `npm run install-browser`
 #   <path>   - an explicit browser executable path
 PDF_BROWSER=${PDF_BROWSER:-chrome}
+
+# ---- Personal settings ----
+
+# Base name for the named PDF copies made by `build`.
+RESUME_NAME=John_Doe
+
+# Optional per-user settings (RESUME_NAME, a deploy() function). Kept in cv/
+# alongside the resume content so personal details stay out of build.sh. See
+# scaffolds/build.conf for the available options.
+BUILD_CONF="$SRC_DIR/build.conf"
+if [[ -f "$BUILD_CONF" ]]; then
+    source "$BUILD_CONF"
+fi
 
 # ---- Targets ----
 
@@ -150,27 +163,28 @@ cmd_build() {
     PRIVATE_CV=true cmd_pdf
     set -x  # Enable command echoing
     cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/cv_private.pdf"
-    cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/John_Doe_full.pdf"
+    cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/${RESUME_NAME}_full.pdf"
     cp "$DIST_DIR/cv.html" "$DIST_DIR/cv_private.html"
     set +x  # Disable command echoing
 
     PUBLIC_CV=true cmd_pdf
     set -x  # Enable command echoing
     cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/cv_public.pdf"
-    cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/John_Doe.pdf"
+    cp "$DIST_DIR/cv.pdf"  "$DIST_DIR/${RESUME_NAME}.pdf"
     cp "$DIST_DIR/cv.html" "$DIST_DIR/cv_public.html"
     set +x  # Disable command echoing
 }
 
 cmd_deploy() {
+    # Deployment is whatever the user's deploy() does (cp, scp, rsync, a custom
+    # script...), so the framework makes no assumptions about where it goes.
+    if ! declare -F deploy > /dev/null; then
+        echo "No deploy command configured: define a deploy() function in $BUILD_CONF" >&2
+        echo "(see $SCAFFOLDS_DIR/build.conf for an example)." >&2
+        exit 1
+    fi
     set -x  # Enable command echoing
-    local dest="~/src/example.com/resume"
-    mkdir -p "$dest"
-    cp "$DIST_DIR/cv_public.pdf"  "$dest/John_Doe.pdf"
-    cp "$DIST_DIR/cv_public.html" "$dest/index.html"
-    rsync -rupE "$DIST_DIR/fonts"       "$dest"
-    rsync -rupE "$DIST_DIR/images"      "$dest"
-    rsync -rupE "$DIST_DIR/stylesheets" "$dest"
+    deploy
     set +x  # Disable command echoing
 }
 

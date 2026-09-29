@@ -98,9 +98,30 @@ To build both private and public variants:
 
     $ ./build.sh build
 
-To deploy, edit the destination path in `cmd_deploy` (in `build.sh`), then run:
+To deploy, define a `deploy()` function in `cv/build.conf` (see [Personal build settings](#personal-build-settings)), then run:
 
     $ ./build.sh deploy
+
+### Personal build settings
+
+Settings specific to you live in `cv/build.conf`, next to your resume content, so `build.sh` itself stays generic. The file is optional and is sourced as bash by `build.sh`. `./build.sh scaffold` creates a commented starter copy; if your `cv/` directory already exists, copy it in yourself:
+
+    $ cp scaffolds/build.conf cv/
+
+It supports:
+
+| Setting | Purpose |
+| :--- | :--- |
+| `RESUME_NAME` | Base name for the named PDF copies from `./build.sh build` — `dist/<RESUME_NAME>.pdf` (public) and `dist/<RESUME_NAME>_full.pdf` (private). Default: `John_Doe` |
+| `deploy()` | A shell function run by `./build.sh deploy`. It can contain any commands — `cp` to a local site checkout, `scp`/`rsync` to a server, a call to your own script — and runs from the repository root with `$DIST_DIR` and `$RESUME_NAME` available. Without it, `./build.sh deploy` exits with an error |
+
+For example:
+
+    RESUME_NAME=Jane_Smith
+
+    deploy() {
+        scp "$DIST_DIR/cv_public.pdf" user@example.com:/var/www/resume/$RESUME_NAME.pdf
+    }
 
 ### PDF rendering
 
@@ -139,7 +160,7 @@ You can set it either way:
 | `./build.sh scaffold` | Create starter cv/ directory |
 | `./build.sh clean` | Remove dist/ and build/ |
 | `./build.sh build` | Build both private and public resume variants |
-| `./build.sh deploy` | Copy public resume to the site directory set in `build.sh` |
+| `./build.sh deploy` | Run the `deploy()` function defined in `cv/build.conf` |
 
 ## ATS Legibility
 
