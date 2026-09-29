@@ -67,7 +67,7 @@ instead — e.g. on a machine without Chrome — install one once:
 
     $ npm run install-browser
 
-and set `PDF_BROWSER=bundled` when building (see below).
+and set `PDF_BROWSER=bundled` in `cv/build.conf` (see below).
 
 Install **Pandoc** via Homebrew or the [official installer](https://pandoc.org/installing.html):
 
@@ -113,6 +113,7 @@ It supports:
 | Setting | Purpose |
 | :--- | :--- |
 | `RESUME_NAME` | Base name for the named PDF copies from `./build.sh build` — `dist/<RESUME_NAME>.pdf` (public) and `dist/<RESUME_NAME>_full.pdf` (private). Default: `John_Doe` |
+| `PDF_BROWSER` | Browser used to render the PDF — see [PDF rendering](#pdf-rendering). Default: `chrome` |
 | `deploy()` | A shell function run by `./build.sh deploy`. It can contain any commands — `cp` to a local site checkout, `scp`/`rsync` to a server, a call to your own script — and runs from the repository root with `$DIST_DIR` and `$RESUME_NAME` available. Without it, `./build.sh deploy` exits with an error |
 
 For example:
@@ -127,7 +128,8 @@ For example:
 
 The PDF is rendered by headless Chrome via Puppeteer (`scripts/html2pdf.mjs`),
 which produces a **tagged, ATS-friendly** PDF. Which browser it uses is
-controlled by the `PDF_BROWSER` setting:
+controlled by the `PDF_BROWSER` setting in `cv/build.conf`
+(see [Personal build settings](#personal-build-settings)):
 
 | `PDF_BROWSER` | Browser used |
 | :--- | :--- |
@@ -135,17 +137,9 @@ controlled by the `PDF_BROWSER` setting:
 | `bundled` | Puppeteer-managed Chromium (`npm run install-browser` first) |
 | `<path>` | An explicit browser executable |
 
-You can set it either way:
+For example, to use the Puppeteer-managed Chromium, add this line to `cv/build.conf`:
 
-- **As an environment variable**, to override the default for a single build:
-
-      $ PDF_BROWSER=bundled ./build.sh build
-
-- **By editing `build.sh`**, to change the default permanently — update the line near the top of the file:
-
-      PDF_BROWSER=${PDF_BROWSER:-chrome}   # change "chrome" to e.g. "bundled"
-
-  Because of the `${PDF_BROWSER:-chrome}` form, an environment variable (when set) still takes precedence over this default.
+    PDF_BROWSER=bundled
 
 ## Build Commands
 

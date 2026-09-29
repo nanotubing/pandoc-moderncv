@@ -29,21 +29,22 @@ DATE=$(date +'%Y:%m:%d')
 PRIVATE_CV=${private_cv:-false}
 PUBLIC_CV=${public_cv:-false}
 
-# Browser used to render the PDF (scripts/html2pdf.mjs). Options:
-#   chrome   - system-installed Google Chrome (default; no download needed)
-#   bundled  - Chromium managed by Puppeteer, for machines without Chrome;
-#              install it once with `npm run install-browser`
-#   <path>   - an explicit browser executable path
-PDF_BROWSER=${PDF_BROWSER:-chrome}
-
 # ---- Personal settings ----
 
 # Base name for the named PDF copies made by `build`.
 RESUME_NAME=John_Doe
 
-# Optional per-user settings (RESUME_NAME, a deploy() function). Kept in cv/
-# alongside the resume content so personal details stay out of build.sh. See
-# scaffolds/build.conf for the available options.
+# Browser used to render the PDF (scripts/html2pdf.mjs). Options:
+#   chrome   - system-installed Google Chrome (default; no download needed)
+#   bundled  - Chromium managed by Puppeteer, for machines without Chrome;
+#              install it once with `npm run install-browser`
+#   <path>   - an explicit browser executable path
+PDF_BROWSER=chrome
+
+# Optional per-user settings (RESUME_NAME, PDF_BROWSER, a deploy() function),
+# overriding the defaults above. Kept in cv/ alongside the resume content so
+# personal details stay out of build.sh. See scaffolds/build.conf for the
+# available options.
 BUILD_CONF="$SRC_DIR/build.conf"
 if [[ -f "$BUILD_CONF" ]]; then
     source "$BUILD_CONF"

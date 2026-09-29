@@ -7,6 +7,7 @@
 `build.sh` no longer needs editing to personalize a build. It sources an optional `cv/build.conf`, which keeps user-specific values in `cv/` alongside the resume content (already ignored by this repo's `.gitignore`), so a private fork's `build.sh` can stay identical to upstream and merge cleanly.
 
 - **`RESUME_NAME`** — base name for the named PDF copies made by `build` (`<RESUME_NAME>.pdf` / `<RESUME_NAME>_full.pdf`), replacing the hard-coded `John_Doe`. The default is unchanged.
+- **`PDF_BROWSER`** — the PDF renderer's browser (`chrome`, `bundled`, or a path) is now set in `cv/build.conf` rather than by editing `build.sh`. It is **no longer read from the environment**: `PDF_BROWSER=bundled ./build.sh build` has no effect, and the default remains `chrome`.
 - **`deploy()`** — `./build.sh deploy` now runs a user-defined shell function instead of a fixed copy to a hard-coded path, so deployment can be any command: `cp`, `scp`, `rsync`, a custom script. With no `deploy()` defined, the command exits with an error pointing at the example rather than writing anywhere.
 - **Fixed:** the old `cmd_deploy` quoted its destination as `"~/src/example.com/resume"`, so the `~` never expanded and `mkdir -p` created a literal `./~/src/…` directory inside the repository.
 - **`scaffolds/build.conf`** — a commented starter file, copied into `cv/` by `./build.sh scaffold`, with `cp`, `scp`, and custom-script deploy examples.
